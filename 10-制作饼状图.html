@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <title>10-制作饼状图</title>
+    <style>
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-family: sans-serif;
+            font-size: 11px;
+        }
+
+        .MyText {
+            font-size: 16px;
+            color: rgb(255, 255, 255);
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        var dataset = [30, 10, 43, 55, 13];
+        // var color = ["red", "green", "blue", "purple", "orange"]
+        var color = d3.scale.category10();
+        // 定义画布大小
+        var width = 400;
+        var height = 400;
+        // 添加 SVG 画布
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+        // 定义一个布局
+        var pie = d3.layout.pie()
+        // 返回值赋给变量 pie，此时 pie 可以当作函数使用
+        var piedata = pie(dataset)
+        // console.log(piedata)
+        // 绘图 - 路径生成器path - 弧生成器
+        var outerRadius = 150; // 外半径
+        var innerRadius = 0; // 内半径，为0 则中间没有空白
+        // 弧生成器 返回的结果 给 arc
+        // 此时，arc 可以当做一个函数使用，把 piedata 作为参数传入，即可得到路径值。
+        var arc = d3.svg.arc() // 弧生成器
+            .innerRadius(innerRadius) // 设置内半径
+            .outerRadius(outerRadius)  // 设置外半径
+        console.log(arc)
+        // 在 SVG 中添加图形元素
+        var arcs = svg.selectAll("g")
+            .data(piedata)
+            .enter()
+            .append("g")
+            .attr("transform", "translate(" + (width / 2) + "," + (width / 2) + ")")
+        // 对每个 g 元素，添加 path
+        /**
+         * 因为 arcs 是同时选择了 5 个 g 元素的选择集，
+         * 所以调用 append(“path”) 后，每个 g 中都有 path 。
+         * 路径值的属性名称是 d，调用弧生成器后返回的值赋值给它。
+         * 要注意，arc(d) 的参数 d 是被绑定的数据。
+         * 
+         * 另外，color 是一个颜色比例尺，它能根据传入的索引号获取相应的颜色值，定义如下:
+         * var color = d3.scale.category10();   //有十种颜色的颜色比例尺
+        */
+        arcs.append("path")
+            .attr("fill", function (d, i) {
+                // return color[i]
+                return color(i)
+            })
+            .attr("d", function (d) {
+                console.log(d)
+                return arc(d)
+            })
+        // 在每一个弧线中心添加文本
+        /**
+         * arc.centroid(d) 能算出弧线的中心。要注意，text() 里返回的是 d.data ，而不是 d 。
+         * 因为被绑定的数据是对象，里面有 d.startAngle、d.endAngle、d.data 等，
+         * 其中 d.data 才是转换前的整数的值。
+        */
+        arcs.append("text")
+            .attr("transform", function (d) {
+                return "translate(" + arc.centroid(d) + ")"
+            })
+            .attr("text-anchor", "middle")
+            .text(function (d) {
+                return d.data
+            })
+
+
+
+
+    </script>
+</body>
+
+</html>

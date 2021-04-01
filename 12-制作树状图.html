@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <title>12-制作树状图</title>
+    <style>
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-family: sans-serif;
+            font-size: 11px;
+        }
+
+        .MyText {
+            font-size: 16px;
+            color: rgb(255, 255, 255);
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // 定义画布大小
+        var width = 400;
+        var height = 400;
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+        var treeData = {
+            "name": "中国",
+            "children": [
+                {
+                    "name": "浙江",
+                    "children": [
+                        {
+                            "name": "杭州"
+                        },
+                        {
+                            "name": "宁波"
+                        },
+                        {
+                            "name": "温州"
+                        },
+                        {
+                            "name": "绍兴"
+                        }
+                    ]
+                },
+                {
+                    "name": "广西",
+                    "children": [
+                        {
+                            "name": "桂林",
+                            "children": [
+                                {
+                                    "name": "秀峰区"
+                                },
+                                {
+                                    "name": "叠彩区"
+                                },
+                                {
+                                    "name": "象山区"
+                                },
+                                {
+                                    "name": "七星区"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "南宁"
+                        },
+                        {
+                            "name": "柳州"
+                        },
+                        {
+                            "name": "防城港"
+                        }
+                    ]
+                },
+                {
+                    "name": "黑龙江",
+                    "children": [
+                        {
+                            "name": "哈尔滨"
+                        },
+                        {
+                            "name": "齐齐哈尔"
+                        },
+                        {
+                            "name": "牡丹江"
+                        },
+                        {
+                            "name": "大庆"
+                        }
+                    ]
+                },
+                {
+                    "name": "新疆",
+                    "children": [
+                        {
+                            "name": "乌鲁木齐"
+                        },
+                        {
+                            "name": "克拉玛依"
+                        },
+                        {
+                            "name": "吐鲁番"
+                        },
+                        {
+                            "name": "哈密"
+                        }
+                    ]
+                }
+            ]
+        }
+        /**
+         * 布局 - 数据转换 - 定义集群图布局
+         * 
+         * 布局保存在变量 tree 中。
+         * size()：设定尺寸，即转换后的各节点的坐标在哪一个范围内。
+         * separation()：设定节点之间的间隔。
+        */
+        var tree = d3.layout.tree()
+            .size([width, height - 200])
+            .separation(function (a, b) {
+                return (a.parent == b.parent ? 1 : 2)
+            })
+        /**
+         * d3.json() 是用来向服务器请求 JSON 文件的。
+         * d3.json() 不能读取本地文件
+         * 
+         * 调用 tree 转换数据，保存到变量 nodes 和 links 中,
+         * 然后输出转换后的数据。
+         * 
+         * nodes 中有各个节点的子节点（children）、深度（depth）、名称（name）、位置（x，y）信息，
+         * 其中名称（name）是 json 文件中就有的属性。
+         * links 中有连线两端（ source , target ）的节点信息。
+         * 
+        */
+        // d3.json("city_tree.json",function(error,root){
+        //     console.log(root)
+        // })
+        var nodes = tree.nodes(treeData)
+        var links = tree.links(nodes)
+        // console.log(nodes)
+        // console.log(links)
+        /**
+         * d3.svg.diagonal() 。
+         * 这是一个对角线生成器，只需要输入两个顶点坐标，即可生成一条贝塞尔曲线。
+         * 
+         * projection() 是一个点变换器，默认是 [ d.x , d.y ]，即保持原坐标不变，
+         * 如果写成 [ d.y , d.x ] ，即是说对任意输入的顶点，都交换 x 和 y 坐标。
+         * 
+        */
+        var diagonal = d3.svg.diagonal()
+            .projection(function (d) { return [d.y, d.x] })
+        var link = svg.selectAll(".link")
+            .data(links)
+            .enter()
+            .append("path")
+            .attr("class", "link")
+            .attr("d", diagonal) //使用对角线生成器
+    </script>
+</body>
+
+</html>

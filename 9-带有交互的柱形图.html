@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <title>9-带有交互的柱形图</title>
+    <style>
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-family: sans-serif;
+            font-size: 11px;
+        }
+
+        .MyText {
+            font-size: 16px;
+            color: rgb(255, 255, 255);
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        // 定义画布大小
+        var width = 400;
+        var height = 400;
+        // 添加 SVG 画布
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+        // 画布周边的空白
+        var padding = { left: 30, right: 30, top: 20, bottom: 20 }
+        // 定义数据
+        var dataset = [10, 20, 30, 40, 33, 24, 12, 5];
+        // 定义 x 轴比例尺  - 序数比例尺
+        var xScale = d3.scale.ordinal().
+            domain(d3.range(dataset.length)).
+            rangeRoundBands([0, width - padding.left - padding.right])
+        // 定义 y 轴比例尺  - 线性比例尺 
+        var yScale = d3.scale.linear()
+            .domain([0, d3.max(dataset)])
+            .range([height - padding.top - padding.bottom, 0])
+        // 定义 x 轴  -  刻度方向向下
+        var xAxis = d3.svg.axis()
+            .scale(xScale)
+            .orient("bottom")
+        // 定义 y 轴  -  向左
+        var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient("left")
+        // 添加矩形之间的空白
+        var rectPadding = 4
+        /**
+         * 添加矩形元素 - 添加事件
+         * 
+         * 这段代码添加了鼠标移入（mouseover），鼠标移出（mouseout）两个事件的监听器。
+         * 监听器函数中都使用了 d3.select(this)，表示选择当前的元素，this 是当前的元素，要改变响应事件的元素时这么写就好。
+         * 
+         * mouseover 监听器函数的内容为：将当前元素变为黄色
+         * mouseout 监听器函数的内容为：缓慢地将元素变为原来的颜色（蓝色）
+        */
+        var rects = svg.selectAll(".MyRect")
+            .data(dataset)
+            .enter()
+            .append("rect")
+            .attr("class", "MyRect")   //把类里的 fill 属性清空
+            .attr("transform", "translate(" + padding.left + "," + padding.top + ")")
+            .attr("x", function (d, i) {
+                return xScale(i) + rectPadding / 2;
+            })
+            .attr("y", function (d) {
+                return yScale(d);
+            })
+            .attr("width", xScale.rangeBand() - rectPadding)
+            .attr("height", function (d) {
+                return height - padding.top - padding.bottom - yScale(d);
+            })
+            .attr("fill", "steelblue")       //填充颜色不要写在CSS里
+            .on("mouseover", function (d, i) {
+                d3.select(this)
+                    .attr("fill", "yellow");
+            })
+            .on("mouseout", function (d, i) {
+                d3.select(this)
+                    .transition()
+                    .duration(500)
+                    .attr("fill", "steelblue");
+            })
+            .on("click",function(d,i){
+                console.log(d)
+                console.log(d3.event);
+            }) 
+        // 添加文字
+        var texts = svg.selectAll(".MyText")
+            .data(dataset)
+            .enter()
+            .append("text")
+            .attr("class", "MyText")
+            .attr("transform", "translate(" + padding.left + "," + padding.top + ")")
+            .attr("x", function (d, i) {
+                return xScale(i) + rectPadding / 2
+            })
+            // .attr("y", function (d) {
+            //     return yScale(d)
+            // })
+            //-----
+            .attr("y", function (d) {
+                var min = yScale.domain()[0];
+                return yScale(min);
+            })
+            .transition()
+            .delay(function (d, i) {
+                return i * 200;
+            })
+            .duration(2000)
+            .ease("bounce")
+            .attr("y", function (d) {
+                return yScale(d);
+            })
+            //-----
+            //文字元素的过渡前后，发生变化的是 y 坐标。
+            //其起始状态是在 y 轴等于 0 的位置
+            //（但要注意，不能在起始状态直接返回 0，要应用比例尺计算画布中的位置）。
+            //终止状态是目标值。
+            .attr("dx", function () {
+                return (xScale.rangeBand() - rectPadding) / 4
+            })
+            .attr("dy", function (d) {
+                return 20
+            })
+            .text(function (d) {
+                return d
+            })
+        // 添加 - x轴
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(" + padding.left + "," + (height - padding.bottom) + ")")
+            .call(xAxis)
+        // 添加 - y轴
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(" + padding.left + "," + padding.top + ")")
+            .call(yAxis)
+    </script>
+</body>
+
+</html>

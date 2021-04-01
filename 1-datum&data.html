@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <title>datum&data</title>
+</head>
+
+<body>
+    <p>Apple</p>
+    <p>Pear</p>
+    <p>Banana</p>
+    <script>
+        var str = "china"
+        var body = d3.select("body")
+        var p = body.selectAll("p")
+
+        // 数据 
+        p.datum(str)
+        p.text(function (d, i) {
+            return `第${i}个元素绑定的数据是${d}`
+        })
+
+        // 数据集
+        var dataset = ["I like dog", "I like cat", "I like snake"];
+        p.data(dataset)
+            .text(function (d, i) {
+                return d;
+            });
+    </script>
+</body>
+
+</html>
